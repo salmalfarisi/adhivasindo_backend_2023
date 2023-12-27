@@ -3,8 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\APIController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,4 +21,5 @@ Route::post('/login', [LoginController::class, 'Login']);
 
 Route::middleware(['token'])->group(function () {
 	Route::get('/logout', [LoginController::class, 'Logout']);
+	Route::post('/find', [APIController::class, 'Finddata']);
 });
