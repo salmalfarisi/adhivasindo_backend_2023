@@ -48,9 +48,66 @@ class APIController extends Controller
 						}
 					}
 				}
-				array_push($listarray, $tempobj);				
+				
+				$cekdata = DB::table('mahasiswas')
+								->where('nama', $tempobj->NAMA)
+								->where('nim', $tempobj->NIM)
+								->where('ymd', $tempobj->YMD)
+								->first();
+								
+				if($cekdata == null)
+				{
+					$now = Carbon::now();
+					DB::beginTransaction();
+					try
+					{
+						DB::table('mahasiswas')->insert([
+							'nama' => $tempobj->NAMA,
+							'nim' => $tempobj->NIM,
+							'ymd' => $tempobj->YMD,
+							'created_at' => $now,
+							'updated_at' => $now,
+						]);
+						
+						DB::commit();
+					}
+					catch(Throwable $e)
+					{
+						DB::rollback();
+						return $this->handlingErrorCatch($e);
+					}
+				}				
 			}
 		}
-		$result = $listarray;
+		
+		if($request->nim != null || $request->tgl != null || $request->nama != null)
+		{
+			$setwhere = [];
+			
+			if($request->nama != null)
+			{
+				array_push($setwhere, ['nama', 'LIKE', '%'.$request->nama.'%']);
+			}
+			
+			if($request->nim != null)
+			{
+				array_push($setwhere, ['nim', '=', $request->nim]);
+			}
+			
+			if($request->tgl != null)
+			{
+				array_push($setwhere, ['ymd', '=', $request->tgl]);
+			}
+			
+			$getresult = DB::table('mahasiswas')->where($setwhere)->get();
+			
+			return $this->sendResponse(true, $getresult, 'Succesfully Get Data');
+		}
+		else
+		{
+			$result = DB::table('mahasiswas')->get();
+			
+			return $this->sendResponse(true, $result, 'Succesfully Get Data');			
+		}
 	}
 }
